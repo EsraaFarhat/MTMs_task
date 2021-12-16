@@ -94,8 +94,30 @@ export default function (app: Express) {
     });
 
     // Delete a post by id
-    app.delete("/api/posts/:postId", (req: Request, res: Response) => {
-        
+    app.delete("/api/posts/:postId", async (req: Request, res: Response) => {
+        try {
+            const postId = req.params.postId;
+
+            const post = await pool.query(
+                "SELECT * FROM post WHERE post_id = $1",
+                [postId]
+            );
+
+            if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
+
+            const deletedPost = await pool.query(
+                "DELETE FROM post WHERE post_id = $1 RETURNING *",
+                [postId]
+              );            
+
+              res.json({
+                message: "Post deleted Successfully",
+                post: _.pick(deletedPost.rows[0], ["post_id", "body", "created_at"]),
+              });
+            
+        } catch (err) {
+            console.log(err);
+        }
     });
   
 }
