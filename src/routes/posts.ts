@@ -20,7 +20,19 @@ export default function (app: Express) {
     });
     
     // Get post by id with its likes and comments
-    app.get("/api/posts/:postId", (req: Request, res: Response) => {
+    app.get("/api/posts/:postId", async (req: Request, res: Response) => {
+        try {
+            const postId = req.params.postId;
+
+            const posts = await pool.query(
+                "SELECT * FROM post WHERE post_id = $1",
+                [postId]
+            );
+    
+            res.json({post: posts.rows[0]});
+        } catch (err) {
+            console.log(err);
+        }
 
     });
 
