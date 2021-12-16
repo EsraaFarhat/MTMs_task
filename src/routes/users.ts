@@ -1,6 +1,8 @@
 import { Express, Request, Response } from "express";
 import bcrypt from "bcrypt";
 import _ from "lodash";
+import jwt from "jsonwebtoken";
+import config from "config";
 
 import pool from "../db/db";
 
@@ -30,4 +32,33 @@ export default function (app: Express) {
     }
   });
   
+    //   User Login
+    app.post("/api/users/login", async (req: Request, res: Response) => {
+        try {
+          const { email, password } = req.body;
+    
+        //   Check if user exists 
+          const user = await pool.query(
+            `SELECT * FROM "user" WHERE email = $1`,
+            [email]
+          );
+
+          if(user.rowCount === 0) return res.status(400).json({error: "Invalid email or password!"});
+
+          const validPassword = await bcrypt.compare(password, user.rows[0].password);
+          if(!validPassword) return res.status(400).json({error: "Invalid email or password!"});
+
+          const token = jwt.sign(
+            {id: user.rows[0].id},
+            config.get("jwtPrivateKey")
+            );
+
+          res.json({
+            message: "Logged In Successfully",
+            token
+          });
+        } catch (err) {
+          console.log(err);
+        }
+      });
 }
