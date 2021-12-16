@@ -1,4 +1,6 @@
 import pool from './db/db';
+import users from './routes/users';
+
 
 import cors from 'cors';
 import express from 'express';
@@ -7,6 +9,8 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors());
+
+users(app);
 
 app.listen(port, () => {
     console.log(`listening on port ${port}...`);
