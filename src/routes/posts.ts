@@ -8,21 +8,41 @@ export default function (app: Express) {
 
     // Get all posts with their likes and comments
     app.get("/api/posts", async (req: Request, res: Response) => {
-        const posts = await pool.query(
-            "SELECT * FROM post"
-        );
-        
-        res.json({posts: posts.rows});
+        try {
+            const posts = await pool.query(
+                "SELECT * FROM post"
+            );
+    
+            res.json({posts: posts.rows});
+        } catch (err) {
+            console.log(err);
+        }
     });
     
     // Get post by id with its likes and comments
     app.get("/api/posts/:postId", (req: Request, res: Response) => {
-        
+
     });
 
     // Create a post
-    app.post("/api/posts", (req: Request, res: Response) => {
-        
+    app.post("/api/posts", async (req: Request, res: Response) => {
+        try {
+            const { body, user_id } = req.body;
+
+            //   Insert post into database
+            const newPost = await pool.query(
+                `INSERT INTO post (body, user_id) VALUES ($1, $2) RETURNING *`,
+                [body, user_id]
+            );
+
+            res.json({
+                message: "Post created Successfully",
+                user: _.pick(newPost.rows[0], ["post_id", "body", "created_at"]),
+            });
+            
+        } catch (err) {
+            console.log(err)
+        }
     });
 
     // Update a post by id
