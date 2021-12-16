@@ -12,6 +12,8 @@ export default function (app: Express) {
             const posts = await pool.query(
                 "SELECT * FROM post"
             );
+
+        if(posts.rowCount === 0) return res.json({message: "No posts has been created yet!"});
     
             res.json({posts: posts.rows});
         } catch (err) {
@@ -24,12 +26,14 @@ export default function (app: Express) {
         try {
             const postId = req.params.postId;
 
-            const posts = await pool.query(
+            const post = await pool.query(
                 "SELECT * FROM post WHERE post_id = $1",
                 [postId]
             );
     
-            res.json({post: posts.rows[0]});
+            if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
+
+            res.json({post: post.rows[0]});
         } catch (err) {
             console.log(err);
         }
@@ -49,17 +53,44 @@ export default function (app: Express) {
 
             res.json({
                 message: "Post created Successfully",
-                user: _.pick(newPost.rows[0], ["post_id", "body", "created_at"]),
+                post: _.pick(newPost.rows[0], ["post_id", "body", "created_at"]),
             });
             
         } catch (err) {
-            console.log(err)
+            console.log(err);
         }
     });
 
     // Update a post by id
-    app.patch("/api/posts/:postId", (req: Request, res: Response) => {
-        
+    app.patch("/api/posts/:postId", async (req: Request, res: Response) => {
+        try {
+            const postId = req.params.postId;
+
+            const { body } = req.body;
+
+            const post = await pool.query(
+                "SELECT * FROM post WHERE post_id = $1",
+                [postId]
+            );
+
+            if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
+
+            if(!body) return res.status(400).json({message: "Nothing to Update!"});
+
+            const updatedPost = await pool.query(
+                "UPDATE post SET body = $1 WHERE post_id = $2 RETURNING *",
+                [body, postId]
+            );
+
+            res.json({
+                message: "Post updated Successfully",
+                post: _.pick(updatedPost.rows[0], ["post_id", "body", "created_at"]),
+            });
+
+            
+        } catch (err) {
+            console.log(err);
+        }
     });
 
     // Delete a post by id
