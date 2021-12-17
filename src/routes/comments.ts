@@ -6,7 +6,7 @@ import pool from "../db/db";
 
 export default function (app: Express) {
     // Create a comment on a post
-    app.post("/api/posts/:postId/comment", async (req: Request, res: Response) => {
+    app.post("/api/comments/:postId", async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
             // ! Will get the user_id from the token in the update
@@ -36,4 +36,37 @@ export default function (app: Express) {
             console.log(err);
         }
     });
+
+    // Update a comment by id
+    app.patch("/api/comments/:commentId", async (req: Request, res: Response) => {
+        try {
+            const commentId = req.params.commentId;
+
+            const { comment } = req.body;
+
+            const oldComment = await pool.query(
+                "SELECT * FROM comment WHERE comment_id = $1",
+                [commentId]
+            );
+
+            if(oldComment.rowCount === 0) return res.status(400).json({message: "Comment Not Found!"});
+
+            if(!comment) return res.status(400).json({message: "Nothing to Update!"});
+
+            const updatedComment = await pool.query(
+                "UPDATE comment SET comment = $1 WHERE comment_id = $2 RETURNING *",
+                [comment, commentId]
+            );
+
+            res.json({
+                message: "Comment updated Successfully",
+                comment: updatedComment.rows[0],
+            });
+
+            
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
 }
