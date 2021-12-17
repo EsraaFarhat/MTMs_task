@@ -40,6 +40,7 @@ export async function createUserSessionHandler(req: Request, res: Response){
 
 export async function invalidDateUserSessionHandler(req: Request, res: Response){
     const sessionId= get(req, "user.session_id");
+    console.log(sessionId);
     await updateSession(sessionId);
 
     return res.sendStatus(200);

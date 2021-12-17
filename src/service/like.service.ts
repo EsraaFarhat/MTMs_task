@@ -4,7 +4,7 @@ export async function getPostLikes(postId: any, query: any){
     try {
         const { page, size } = query;
 
-        const limit = size ? size : 2;
+        const limit = size ? size : 5;
         const offset = page ? (page)*limit : 0;
 
         return await pool.query(

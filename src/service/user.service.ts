@@ -28,7 +28,7 @@ export async function createUser(input: any){
 export async function findUser(email: any){
 //   Check if user exists 
 const user = await pool.query(
-    `SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL`,
+    `SELECT * FROM users WHERE email = $1`,
     [email]
   );
 
@@ -38,7 +38,7 @@ const user = await pool.query(
 export async function findUserByID(user_id: any){
     //   Check if user exists 
     const user = await pool.query(
-        `SELECT * FROM users WHERE user_id = $1 AND deleted_at IS NULL`,
+        `SELECT * FROM users WHERE user_id = $1`,
         [user_id]
       );
     

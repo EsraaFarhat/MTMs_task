@@ -8,7 +8,7 @@ export async function likeHandler(req: Request, res: Response){
         const postId = req.params.postId;
         const user_id = (<any>req).user.user_id;
 
-        const post = await findPost([postId]);
+        const post = await findPost(postId);
 
         if(post?.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
 
