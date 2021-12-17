@@ -5,6 +5,43 @@ import pool from "../db/db";
 import auth from "../middleware/auth";
 
 export default function (app: Express) {
+
+    // Get all comments belong to the logged in user
+    app.get("/api/comments", auth, async (req: Request, res: Response) => {
+        try {
+            const user_id = (<any>req).user.user_id;
+
+            const comments = await pool.query(
+                "SELECT * FROM comment WHERE user_id = $1",
+                [user_id]
+            );
+
+        if(comments.rowCount === 0) return res.json({message: "No comments has been created yet!"});
+    
+            res.json({comments: comments.rows});
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
+    // Get comment by Id
+    app.get("/api/comments/:commentId", auth, async (req: Request, res: Response) => {
+        try {
+            const commentId = req.params.commentId;
+
+            const comment = await pool.query(
+                "SELECT * FROM comment WHERE comment_id = $1",
+                [commentId]
+            );
+
+        if(comment.rowCount === 0) return res.json({message: "No comment found!"});
+    
+            res.json({comment: comment.rows[0]});
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
     // Create a comment on a post
     app.post("/api/comments/:postId", auth, async (req: Request, res: Response) => {
         try {
