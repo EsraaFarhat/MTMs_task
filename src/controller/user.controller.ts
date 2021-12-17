@@ -1,10 +1,17 @@
 import { Request, Response } from "express";
 import _ from "lodash";
 
-import { createUser, deleteUser, restoreUser } from "../service/user.service";
+import { findUser, createUser, deleteUser, restoreUser, validateUser } from "../service/user.service";
 
 export async function createUserHandler(req: Request, res: Response){
     try {
+        const { error } = validateUser(req.body);
+        if (error) return res.status(400).json({message: error.details[0].message });
+
+        const user  = await findUser(req.body.email);
+
+        if(user.rows) return res.status(400).json({message: "User already exists!" });
+
         const newUser = await createUser(req.body);
 
         res.json({

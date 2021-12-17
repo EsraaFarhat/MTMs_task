@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import _ from "lodash";
 
-import { getAllPosts, getPost, createPost, updatePost, deletePost } from "../service/post.service";
+import { getAllPosts, getPost, createPost, updatePost, deletePost, validatePost } from "../service/post.service";
 import { getPostComments } from "../service/comment.service";
 import { getPostLikes } from "../service/like.service";
 
@@ -41,6 +41,9 @@ export async function getPostHandler(req: Request, res: Response){
 
 export async function createPostHandler(req: Request, res: Response){
     try {
+        const { error } = validatePost(req.body);
+        if (error) return res.status(400).json({message: error.details[0].message });
+
         //   Insert post into database
         const newPost = await createPost(req);
 
@@ -56,8 +59,10 @@ export async function createPostHandler(req: Request, res: Response){
 
 export async function updatePostHandler(req: Request, res: Response){
     try {
-        const postId = req.params.postId;
+        const { error } = validatePost(req.body);
+        if (error) return res.status(400).json({message: error.details[0].message });
 
+        const postId = req.params.postId;
         const { body } = req.body;
 
         if(!body) return res.status(400).json({message: "Nothing to Update!"});

@@ -1,3 +1,5 @@
+import Joi from "joi";
+
 import pool from "../db/db";
 
 export async function getAllPosts(){
@@ -73,4 +75,11 @@ export async function deletePost(postId: any){
     } catch (err) {
         console.log(err);
     }
+}
+
+export function validatePost(post: any) {
+    const schema = Joi.object({
+      body: Joi.string().min(1).max(1024).required(),
+    });
+    return schema.validate(post);
 }

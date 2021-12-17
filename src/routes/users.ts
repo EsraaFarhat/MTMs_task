@@ -7,7 +7,7 @@ import { createUserSessionHandler } from "../controller/session.controller";
 export default function (app: Express) {
 
     // User Signup
-  app.post("/api/users/signup", createUserHandler);
+  app.post("/api/users/signup",  createUserHandler);
   
     //   User Login
     app.post("/api/users/login", createUserSessionHandler);

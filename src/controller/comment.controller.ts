@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { getAllUserComments, getComment, createComment, updateComment, deleteComment } from "../service/comment.service";
+import { getAllUserComments, getComment, createComment, updateComment, deleteComment, validateComment } from "../service/comment.service";
 import { findPost } from "../service/post.service";
 
 export async function getAllUserCommentsHandler(req: Request, res: Response){
@@ -33,6 +33,9 @@ export async function getCommentHandler(req: Request, res: Response){
 
 export async function createCommentHandler(req: Request, res: Response){
     try {
+        const { error } = validateComment(req.body);
+        if (error) return res.status(400).json({message: error.details[0].message });
+
         const postId = req.params.postId;
         const { comment } = req.body;
         const user_id = (<any>req).user.user_id;
@@ -58,8 +61,10 @@ export async function createCommentHandler(req: Request, res: Response){
 
 export async function updateCommentHandler(req: Request, res: Response){
     try {
-        const commentId = req.params.commentId;
+        const { error } = validateComment(req.body);
+        if (error) return res.status(400).json({message: error.details[0].message });
 
+        const commentId = req.params.commentId;
         const { comment } = req.body;
 
         if(!comment) return res.status(400).json({message: "Nothing to Update!"});

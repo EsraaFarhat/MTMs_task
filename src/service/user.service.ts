@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import config from "config";
+import Joi from "joi";
 
 import pool from "../db/db";
 
@@ -37,7 +38,11 @@ const user = await pool.query(
 }
 
 export async function validatePassword(password: any, userPassword: any){
-    return await bcrypt.compare(password, userPassword);
+    try{
+        return await bcrypt.compare(password, userPassword);
+    } catch (err) {
+        console.log(err);
+    }
 }
 
 export async function generateAccessToken(user_id: any){
@@ -73,3 +78,22 @@ export async function restoreUser(userId: any){
         console.log(err);
       }     
 }
+
+export function validateUser(user: any) {
+    const schema = Joi.object({
+      name: Joi.string().min(3).max(50).required(),
+      password: Joi.string().min(5).max(255).required(),
+      email: Joi.string().min(5).max(255).required().email(),
+      birth_date: Joi.date().required(),
+    });
+    return schema.validate(user);
+  }
+
+  export function validateLoginInputs(user: any) {
+    const schema = Joi.object({
+      password: Joi.string().min(5).max(255).required(),
+      email: Joi.string().min(5).max(255).required().email(),
+    });
+    return schema.validate(user);
+  }
+  

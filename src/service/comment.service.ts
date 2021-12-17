@@ -1,3 +1,5 @@
+import Joi from "joi";
+
 import pool from "../db/db";
 
 export async function getPostComments(postId: any){
@@ -68,4 +70,11 @@ export async function deleteComment(commentId: any){
     } catch (err) {
         console.log(err);
     }
+}
+
+export function validateComment(comment: any) {
+    const schema = Joi.object({
+      comment: Joi.string().min(1).max(1024).required(),
+    });
+    return schema.validate(comment);
 }

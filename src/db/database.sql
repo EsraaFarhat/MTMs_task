@@ -9,7 +9,6 @@ CREATE TABLE users(
     email VARCHAR (255) UNIQUE NOT NULL,
     birth_date DATE NOT NULL,
     created_at timestamp default now(),
-    last_login timestamp
     deleted_at timestamp
 );
 
