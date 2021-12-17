@@ -2,11 +2,12 @@ import { Express, Request, Response } from "express";
 import _ from "lodash";
 
 import pool from "../db/db";
+import auth from "../middleware/auth";
 
 export default function (app: Express) {
 
     // Get all posts with their likes and comments
-    app.get("/api/posts", async (req: Request, res: Response) => {
+    app.get("/api/posts", auth, async (req: Request, res: Response) => {
         try {
             const posts = await pool.query(
                 "SELECT * FROM post"
@@ -21,7 +22,7 @@ export default function (app: Express) {
     });
     
     // Get post by id with its likes and comments
-    app.get("/api/posts/:postId", async (req: Request, res: Response) => {
+    app.get("/api/posts/:postId", auth, async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
 
@@ -40,9 +41,10 @@ export default function (app: Express) {
     });
 
     // Create a post
-    app.post("/api/posts", async (req: Request, res: Response) => {
+    app.post("/api/posts", auth, async (req: Request, res: Response) => {
         try {
-            const { body, user_id } = req.body;
+            const { body } = req.body;
+            const user_id = (<any>req).user.user_id;
 
             //   Insert post into database
             const newPost = await pool.query(
@@ -61,7 +63,7 @@ export default function (app: Express) {
     });
 
     // Update a post by id
-    app.patch("/api/posts/:postId", async (req: Request, res: Response) => {
+    app.patch("/api/posts/:postId", auth, async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
 
@@ -93,7 +95,7 @@ export default function (app: Express) {
     });
 
     // Delete a post by id
-    app.delete("/api/posts/:postId", async (req: Request, res: Response) => {
+    app.delete("/api/posts/:postId", auth, async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
 

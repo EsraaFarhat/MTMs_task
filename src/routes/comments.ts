@@ -2,14 +2,15 @@ import { Express, Request, Response } from "express";
 import _ from "lodash";
 
 import pool from "../db/db";
+import auth from "../middleware/auth";
 
 export default function (app: Express) {
     // Create a comment on a post
-    app.post("/api/comments/:postId", async (req: Request, res: Response) => {
+    app.post("/api/comments/:postId", auth, async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
-            // ! Will get the user_id from the token in the update
-            const { comment, user_id } = req.body;
+            const { comment } = req.body;
+            const user_id = (<any>req).user.user_id;
 
             const post = await pool.query(
                 "SELECT * FROM post WHERE post_id = $1",
@@ -37,7 +38,7 @@ export default function (app: Express) {
     });
 
     // Update a comment by id
-    app.patch("/api/comments/:commentId", async (req: Request, res: Response) => {
+    app.patch("/api/comments/:commentId", auth, async (req: Request, res: Response) => {
         try {
             const commentId = req.params.commentId;
 
@@ -69,7 +70,7 @@ export default function (app: Express) {
     });
 
     // Delete a comment by id
-    app.delete("/api/comments/:commentId", async (req: Request, res: Response) => {
+    app.delete("/api/comments/:commentId", auth, async (req: Request, res: Response) => {
         try {
             const commentId = req.params.commentId;
 

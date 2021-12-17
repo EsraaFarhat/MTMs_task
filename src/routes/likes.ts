@@ -2,18 +2,17 @@ import { Express, Request, Response } from "express";
 import _ from "lodash";
 
 import pool from "../db/db";
+import auth from "../middleware/auth";
 
 export default function (app: Express) {
     /* like and unlike a post
-    ** If user presses the like button for the first time it will create a record in like table with value 1
-    ** If user presses the like button again it will reverse the value evert time he presses the button
+    ** If user presses the like button for the first time it will create a record in like table
+    ** If user presses the like button again on the same post it will delete the record from the table
     */
-
-    app.post("/api/likes/:postId", async (req: Request, res: Response) => {
+    app.post("/api/likes/:postId", auth, async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
-            // ! Will get the user_id from the token in the update
-            const { user_id } = req.body;
+            const user_id = (<any>req).user.user_id;
 
             const post = await pool.query(
                 "SELECT * FROM post WHERE post_id = $1",

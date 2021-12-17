@@ -49,7 +49,7 @@ export default function (app: Express) {
           if(!validPassword) return res.status(400).json({error: "Invalid email or password!"});
 
           const token = jwt.sign(
-            {id: user.rows[0].id},
+            {user_id: user.rows[0].user_id},
             config.get("jwtPrivateKey")
             );
 
