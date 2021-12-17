@@ -1,6 +1,7 @@
 import pool from './db/db';
 import users from './routes/users';
 import posts from './routes/posts';
+import comments from './routes/comments';
 
 
 import cors from 'cors';
@@ -13,6 +14,7 @@ app.use(cors());
 
 users(app);
 posts(app);
+comments(app);
 
 app.listen(port, () => {
     console.log(`listening on port ${port}...`);

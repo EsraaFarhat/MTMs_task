@@ -1,6 +1,5 @@
 import { Express, Request, Response } from "express";
 import _ from "lodash";
-import config from "config";
 
 import pool from "../db/db";
 
