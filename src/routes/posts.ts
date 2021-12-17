@@ -3,6 +3,7 @@ import _ from "lodash";
 
 import pool from "../db/db";
 import auth from "../middleware/auth";
+import hasPrivilege from "../middleware/hasPrivilege";
 
 export default function (app: Express) {
 
@@ -63,18 +64,11 @@ export default function (app: Express) {
     });
 
     // Update a post by id
-    app.patch("/api/posts/:postId", auth, async (req: Request, res: Response) => {
+    app.patch("/api/posts/:postId", [auth, hasPrivilege], async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
 
             const { body } = req.body;
-
-            const post = await pool.query(
-                "SELECT * FROM post WHERE post_id = $1",
-                [postId]
-            );
-
-            if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
 
             if(!body) return res.status(400).json({message: "Nothing to Update!"});
 
@@ -95,16 +89,9 @@ export default function (app: Express) {
     });
 
     // Delete a post by id
-    app.delete("/api/posts/:postId", auth, async (req: Request, res: Response) => {
+    app.delete("/api/posts/:postId", [auth, hasPrivilege], async (req: Request, res: Response) => {
         try {
             const postId = req.params.postId;
-
-            const post = await pool.query(
-                "SELECT * FROM post WHERE post_id = $1",
-                [postId]
-            );
-
-            if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
 
             const deletedPost = await pool.query(
                 "DELETE FROM post WHERE post_id = $1 RETURNING *",

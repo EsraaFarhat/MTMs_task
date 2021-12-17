@@ -3,6 +3,7 @@ import _ from "lodash";
 
 import pool from "../db/db";
 import auth from "../middleware/auth";
+import hasPrivilege from "../middleware/hasPrivilege";
 
 export default function (app: Express) {
 
@@ -75,18 +76,11 @@ export default function (app: Express) {
     });
 
     // Update a comment by id
-    app.patch("/api/comments/:commentId", auth, async (req: Request, res: Response) => {
+    app.patch("/api/comments/:commentId", [auth, hasPrivilege], async (req: Request, res: Response) => {
         try {
             const commentId = req.params.commentId;
 
             const { comment } = req.body;
-
-            const oldComment = await pool.query(
-                "SELECT * FROM comment WHERE comment_id = $1",
-                [commentId]
-            );
-
-            if(oldComment.rowCount === 0) return res.status(400).json({message: "Comment Not Found!"});
 
             if(!comment) return res.status(400).json({message: "Nothing to Update!"});
 
@@ -107,16 +101,9 @@ export default function (app: Express) {
     });
 
     // Delete a comment by id
-    app.delete("/api/comments/:commentId", auth, async (req: Request, res: Response) => {
+    app.delete("/api/comments/:commentId", [auth, hasPrivilege], async (req: Request, res: Response) => {
         try {
             const commentId = req.params.commentId;
-
-            const comment = await pool.query(
-                "SELECT * FROM comment WHERE comment_id = $1",
-                [commentId]
-            );
-
-            if(comment.rowCount === 0) return res.status(400).json({message: "Comment Not Found!"});
 
             const deletedComment = await pool.query(
                 "DELETE FROM comment WHERE comment_id = $1 RETURNING *",

@@ -1,5 +1,4 @@
 import { Express, Request, Response } from "express";
-import _ from "lodash";
 
 import pool from "../db/db";
 import auth from "../middleware/auth";
