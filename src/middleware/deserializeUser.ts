@@ -22,15 +22,19 @@ export default async function (req: Request, res: Response, next: NextFunction) 
   }
 
   if(expired && refreshToken){
-      const newAccessToken = await reIssueAccessToken({refreshToken});
-
-      if(newAccessToken){
-        res.setHeader("x-access-token", newAccessToken);
-
-        const { decoded } = decode(newAccessToken);
-
-        (<any>req).user = decoded;
+      try {
+          const newAccessToken = await reIssueAccessToken({refreshToken});
+          if(newAccessToken){
+            res.setHeader("x-access-token", newAccessToken);
+    
+            const { decoded } = decode(newAccessToken);
+    
+            (<any>req).user = decoded;
+          }
+      } catch (err) {
+        console.log(err);
       }
+
   }
 
   return next();

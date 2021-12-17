@@ -65,24 +65,29 @@ export function validateLoginInputs(user: any) {
   }
   
 export async function reIssueAccessToken({refreshToken} : {refreshToken: string}){
-    const { decoded } = decode(refreshToken);
-
-    if(!decoded || !get(decoded, "session_id")) return false;
-
-    const session = await pool.query(
-        "SELECT * FROM session WHERE session_id = $1",
-        [get(decoded, "session_id")]
-    );
-
-    if(session?.rowCount === 0 || !session.rows[0]?.valid) return false;
-
-    const user = await findUserByID(session.rows[0]?.user_id);
-
-    if(user?.rowCount === 0) return false;
-
-    const accessToken = await generateAccessToken(user.rows[0]?.user_id, session.rows[0]?.session_id);
-
-    return accessToken;
+    try {
+        const { decoded } = decode(refreshToken);
+    
+        if(!decoded || !get(decoded, "session_id")) return false;
+    
+        const session = await pool.query(
+            "SELECT * FROM session WHERE session_id = $1",
+            [get(decoded, "session_id")]
+        );
+    
+        if(session?.rowCount === 0 || !session.rows[0]?.valid) return false;
+    
+        const user = await findUserByID(session.rows[0]?.user_id);
+    
+        if(user?.rowCount === 0) return false;
+    
+        const accessToken = await generateAccessToken(user.rows[0]?.user_id, session.rows[0]?.session_id);
+    
+        return accessToken;
+        
+    } catch (err) {
+        console.log(err);
+    }
 
 }
 
