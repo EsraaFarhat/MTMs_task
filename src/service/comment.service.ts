@@ -2,25 +2,36 @@ import Joi from "joi";
 
 import pool from "../db/db";
 
-export async function getPostComments(postId: any){
+export async function getPostComments(postId: any, query: any){
     try {
+        const { page, size } = query;
+
+        const limit = size ? size : 2;
+        const offset = page ? (page)*limit : 0;
+
         return await pool.query(
             `SELECT comment.comment, name AS username 
              FROM comment
              INNER JOIN users ON (comment.user_id = users.user_id)
-             WHERE comment.post_id = $1`,
-            [postId]
+             WHERE comment.post_id = $1
+             OFFSET $2 LIMIT $3`,
+            [postId,  offset, limit]
         );
     } catch (err) {
         console.log(err);
     }
 }
 
-export async function getAllUserComments(user_id: any){
+export async function getAllUserComments(user_id: any, query:any){
     try {
+        const { page, size } = query;
+
+        const limit = size ? size : 2;
+        const offset = page ? (page)*limit : 0;
+
         return await pool.query(
-            "SELECT * FROM comment WHERE user_id = $1",
-            [user_id]
+            "SELECT * FROM comment WHERE user_id = $1 OFFSET $2 LIMIT $3",
+            [user_id, offset, limit]
         );
     } catch (err) {
         console.log(err);

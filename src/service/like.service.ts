@@ -1,13 +1,19 @@
 import pool from "../db/db";
 
-export async function getPostLikes(postId: any){
+export async function getPostLikes(postId: any, query: any){
     try {
+        const { page, size } = query;
+
+        const limit = size ? size : 2;
+        const offset = page ? (page)*limit : 0;
+
         return await pool.query(
             `SELECT name AS username 
              FROM likes
              INNER JOIN users ON (likes.user_id = users.user_id)
-             WHERE likes.post_id = $1`,
-            [postId]
+             WHERE likes.post_id = $1
+             OFFSET $2 LIMIT $3`,
+            [postId, offset, limit]
         );
     } catch (err) {
         console.log(err);

@@ -7,9 +7,9 @@ import { getPostLikes } from "../service/like.service";
 
 export async function getAllPostsHandler(req: Request, res: Response){
     try {
-        const posts = await getAllPosts();
+        const posts = await getAllPosts(req.query);
 
-    if(posts?.rowCount === 0) return res.json({message: "No posts has been created yet!"});
+        if(posts?.rowCount === 0) return res.json({message: "No posts found!"});
 
         res.json({posts: posts?.rows});
     } catch (err) {
@@ -25,9 +25,9 @@ export async function getPostHandler(req: Request, res: Response){
         
         if(post?.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
 
-        const comments = await getPostComments(postId);
+        const comments = await getPostComments(postId, req.query);
 
-        const likes = await getPostLikes(postId);
+        const likes = await getPostLikes(postId, req.query);
 
         res.json({
             post: post?.rows[0],

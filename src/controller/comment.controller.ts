@@ -7,9 +7,9 @@ export async function getAllUserCommentsHandler(req: Request, res: Response){
     try {
         const user_id = (<any>req).user.user_id;
 
-        const comments = await getAllUserComments(user_id);
+        const comments = await getAllUserComments(user_id, req.query);
 
-        if(comments?.rowCount === 0) return res.json({message: "No comments has been created yet!"});
+        if(comments?.rowCount === 0) return res.json({message: "No comments found!"});
 
         res.json({comments: comments?.rows});
     } catch (err) {

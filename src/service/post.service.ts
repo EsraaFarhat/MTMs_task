@@ -2,10 +2,16 @@ import Joi from "joi";
 
 import pool from "../db/db";
 
-export async function getAllPosts(){
+export async function getAllPosts(query:any){
     try {
+        const { page, size } = query;
+
+        const limit = size ? size : 2;
+        const offset = page ? (page)*limit : 0;
+
         return await pool.query(
-            "SELECT * FROM post"
+            "SELECT * FROM post OFFSET $1 LIMIT $2",
+            [offset, limit]
         );
     } catch (err) {
         console.log(err);
