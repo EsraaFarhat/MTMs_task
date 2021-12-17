@@ -21,13 +21,13 @@ export default function (app: Express) {
             if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
 
             const like = await pool.query(
-                `SELECT * FROM "like" WHERE user_id = $1 AND post_id = $2`,
+                `SELECT * FROM likes WHERE user_id = $1 AND post_id = $2`,
                 [user_id, postId]
             );
 
             if(like.rowCount === 0) {
                 await pool.query(
-                    `INSERT INTO "like" (user_id, post_id) VALUES ($1, $2)`,
+                    `INSERT INTO likes (user_id, post_id) VALUES ($1, $2)`,
                     [user_id, postId]
                 );
                 return res.json({
@@ -35,7 +35,7 @@ export default function (app: Express) {
                 });
             } else{
                 await pool.query(
-                    `DELETE FROM "like" WHERE user_id = $1 AND post_id = $2`,
+                    `DELETE FROM likes WHERE user_id = $1 AND post_id = $2`,
                     [user_id, postId]
                 );
                 return res.json({

@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import config from "config";
 
 import pool from "../db/db";
+import auth from "../middleware/auth";
 
 export default function (app: Express) {
 
@@ -19,7 +20,7 @@ export default function (app: Express) {
 
     //   Insert user into database
       const newUser = await pool.query(
-        `INSERT INTO "user" (name, password, email, birth_date) VALUES ($1, $2, $3, $4) RETURNING *`,
+        `INSERT INTO users (name, password, email, birth_date) VALUES ($1, $2, $3, $4) RETURNING *`,
         [name, hashedPassword, email, birth_date]
       );
 
@@ -39,7 +40,7 @@ export default function (app: Express) {
     
         //   Check if user exists 
           const user = await pool.query(
-            `SELECT * FROM "user" WHERE email = $1`,
+            `SELECT * FROM users WHERE email = $1 AND deleted_at IS NULL`,
             [email]
           );
 
@@ -61,4 +62,43 @@ export default function (app: Express) {
           console.log(err);
         }
       });
+
+      // Delete a user (Soft delete)
+    app.delete("/api/users/:userId", auth, async (req: Request, res: Response) => {
+        try {
+            const userId = req.params.userId;
+
+            const deletedUser = await pool.query(
+                `DELETE FROM users WHERE user_id = $1`,
+                [userId]
+              );            
+
+              res.json({
+                message: "User deleted Successfully",
+              });
+            
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
+      // Delete a user (Soft delete)
+      app.patch("/api/users/:userId", auth, async (req: Request, res: Response) => {
+        try {
+            const userId = req.params.userId;
+
+            const restoredUser = await pool.query(
+                `UPDATE users SET deleted_at = null WHERE user_id = $1 RETURNING *`,
+                [userId]
+              );            
+
+              res.json({
+                message: "User restored Successfully",
+                user: _.pick(restoredUser.rows[0], ["name", "email", "birth_date", "created_at"]),
+              });
+            
+        } catch (err) {
+            console.log(err);
+        }
+    });
 }

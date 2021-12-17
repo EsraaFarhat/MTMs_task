@@ -30,7 +30,7 @@ export default function (app: Express) {
             const post = await pool.query(
                 `SELECT post.*, count(like_id) AS likes
                  FROM post
-                 LEFT JOIN "like" ON (post.post_id = "like".post_id)
+                 LEFT JOIN likes ON (post.post_id = likes.post_id)
                  GROUP BY post.post_id
                  HAVING post.post_id = $1`,
                 [postId]
@@ -39,16 +39,16 @@ export default function (app: Express) {
             const comments = await pool.query(
                 `SELECT comment.comment, name AS username 
                  FROM comment
-                 INNER JOIN "user" ON (comment.user_id = "user".user_id)
+                 INNER JOIN users ON (comment.user_id = users.user_id)
                  WHERE comment.post_id = $1`,
                 [postId]
             );
 
             const likes = await pool.query(
                 `SELECT name AS username 
-                 FROM "like"
-                 INNER JOIN "user" ON ("like".user_id = "user".user_id)
-                 WHERE "like".post_id = $1`,
+                 FROM likes
+                 INNER JOIN users ON (likes.user_id = users.user_id)
+                 WHERE likes.post_id = $1`,
                 [postId]
             );
                 
