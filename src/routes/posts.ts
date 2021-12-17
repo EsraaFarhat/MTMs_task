@@ -28,13 +28,37 @@ export default function (app: Express) {
             const postId = req.params.postId;
 
             const post = await pool.query(
-                "SELECT * FROM post WHERE post_id = $1",
+                `SELECT post.*, count(like_id) AS likes
+                 FROM post
+                 LEFT JOIN "like" ON (post.post_id = "like".post_id)
+                 GROUP BY post.post_id
+                 HAVING post.post_id = $1`,
                 [postId]
             );
-    
+
+            const comments = await pool.query(
+                `SELECT comment.comment, name AS username 
+                 FROM comment
+                 INNER JOIN "user" ON (comment.user_id = "user".user_id)
+                 WHERE comment.post_id = $1`,
+                [postId]
+            );
+
+            const likes = await pool.query(
+                `SELECT name AS username 
+                 FROM "like"
+                 INNER JOIN "user" ON ("like".user_id = "user".user_id)
+                 WHERE "like".post_id = $1`,
+                [postId]
+            );
+                
             if(post.rowCount === 0) return res.status(400).json({message: "Post Not Found!"});
 
-            res.json({post: post.rows[0]});
+            res.json({
+                post: post.rows[0],
+                comments: comments.rows,
+                likes: likes.rows,
+            });
         } catch (err) {
             console.log(err);
         }
