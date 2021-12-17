@@ -3,8 +3,13 @@ import jwt from  "jsonwebtoken";
 import config from "config";
 
 export default function (req: Request, res: Response, next: NextFunction) {
-  const token = req.header("x-auth-token");
-  if (!token) return res.status(401).json({ message: "Access denied. No token provided."});
+    
+    let token = req.header("x-access-token");
+    if(res.getHeader("x-access-token")){
+        token = <string>res.getHeader("x-access-token");
+    }
+
+    if (!token) return res.status(401).json({ message: "Access denied. No token provided."});
 
   try {
     const decoded = jwt.verify(token, config.get("jwtPrivateKey"));

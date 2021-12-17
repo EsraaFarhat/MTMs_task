@@ -26,6 +26,14 @@ CREATE TRIGGER soft_delete_user
   BEFORE DELETE ON users
   FOR EACH ROW EXECUTE PROCEDURE soft_delete();
 
+CREATE TABLE session(
+    session_id SERIAL PRIMARY KEY,
+    valid boolean default true,
+    user_agent text NOT NULL,
+    created_at timestamp default now(),
+    user_id Integer REFERENCES users ON DELETE CASCADE
+);
+
 CREATE TABLE post(
     post_id SERIAL PRIMARY KEY,
     body text NOT NULL,

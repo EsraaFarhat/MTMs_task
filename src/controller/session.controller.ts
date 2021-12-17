@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
-import _ from "lodash";
+import config from "config";
+import {get} from "lodash";
 
-// import { createUserSession } from "../service/session.service";
-import { findUser, validatePassword, generateAccessToken, validateLoginInputs } from "../service/user.service";
+import { createUserSession } from "../service/session.service";
+import { validatePassword, generateAccessToken, generateRefreshToken, validateLoginInputs, updateSession } from "../service/session.service";
+import { findUser } from "../service/user.service";
 
 export async function createUserSessionHandler(req: Request, res: Response){
     try {
@@ -16,17 +18,29 @@ export async function createUserSessionHandler(req: Request, res: Response){
 
         const validPassword = validatePassword(password, user.rows[0].password);
         if(!validPassword) return res.status(400).json({error: "Invalid email or password!"});
+        
+        const newSession = await createUserSession(user.rows[0].user_id, req.get("user-agent") || "");
 
-        const accessToken = await generateAccessToken(user.rows[0].user_id);
+        // Create Access Token
+        const accessToken = await generateAccessToken(user.rows[0].user_id, newSession?.rows[0].session_id);
 
-        // const newSession = await createUserSession(req.body);
+        // Create Refresh token
+        const refreshToken = await generateRefreshToken(newSession?.rows[0].session_id);
 
         res.json({
             message: "Logged In Successfully",
-            accessToken
+            accessToken,
+            refreshToken
       });
         
     } catch (err) {
         console.log(err);
     }
+}
+
+export async function invalidDateUserSessionHandler(req: Request, res: Response){
+    const sessionId= get(req, "user.session_id");
+    await updateSession(sessionId);
+
+    return res.sendStatus(200);
 }

@@ -9,8 +9,8 @@ export default function (app: Express) {
     // User Signup
   app.post("/api/users/signup",  createUserHandler);
   
-    //   User Login
-    app.post("/api/users/login", createUserSessionHandler);
+    // //   User Login
+    // app.post("/api/users/login", createUserSessionHandler);
 
       // Delete a user (Soft delete)
     app.delete("/api/users/:userId", auth, deleteUserHandler);
