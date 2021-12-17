@@ -27,12 +27,8 @@ CREATE TABLE comment(
     post_id Integer REFERENCES post ON DELETE CASCADE
 );
 
-CREATE TYPE like_values AS ENUM ('1', '-1');
-
--- Value 1 for like and -1 for dislike
 CREATE TABLE "like"(
     like_id SERIAL PRIMARY KEY,
-    like_value like_values,
     user_id Integer REFERENCES "user" ON DELETE CASCADE,
     post_id Integer REFERENCES post ON DELETE CASCADE
 );

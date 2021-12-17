@@ -1,5 +1,4 @@
 import { Express, Request, Response } from "express";
-import bcrypt from "bcrypt";
 import _ from "lodash";
 
 import pool from "../db/db";
