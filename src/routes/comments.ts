@@ -69,4 +69,31 @@ export default function (app: Express) {
         }
     });
 
+    // Delete a comment by id
+    app.delete("/api/comments/:commentId", async (req: Request, res: Response) => {
+        try {
+            const commentId = req.params.commentId;
+
+            const comment = await pool.query(
+                "SELECT * FROM comment WHERE comment_id = $1",
+                [commentId]
+            );
+
+            if(comment.rowCount === 0) return res.status(400).json({message: "Comment Not Found!"});
+
+            const deletedComment = await pool.query(
+                "DELETE FROM comment WHERE comment_id = $1 RETURNING *",
+                [commentId]
+              );            
+
+              res.json({
+                message: "Comment deleted Successfully",
+                comment: deletedComment.rows[0],
+              });
+            
+        } catch (err) {
+            console.log(err);
+        }
+    });
+
 }
